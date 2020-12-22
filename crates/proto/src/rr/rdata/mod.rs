@@ -31,6 +31,7 @@ pub mod opt;
 pub mod soa;
 pub mod srv;
 pub mod sshfp;
+pub mod svcb;
 pub mod tlsa;
 pub mod txt;
 
@@ -43,5 +44,7 @@ pub use self::opt::OPT;
 pub use self::soa::SOA;
 pub use self::srv::SRV;
 pub use self::sshfp::SSHFP;
+pub use self::svcb::HTTPS;
+pub use self::svcb::SVCB;
 pub use self::tlsa::TLSA;
 pub use self::txt::TXT;

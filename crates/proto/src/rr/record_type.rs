@@ -59,6 +59,7 @@ pub enum RecordType {
     //  CERT,       // 37 RFC 4398 Certificate record
     /// RFC 1035[1] Canonical name record
     CNAME,
+    HTTPS,
     //  DHCID,      // 49 RFC 4701 DHCP identifier
     //  DNAME,      // 39 RFC 2672 Delegation Name
     //  HIP,        // 55 RFC 5205 Host Identity Protocol
@@ -88,6 +89,7 @@ pub enum RecordType {
     SRV,
     /// RFC 4255 SSH Public Key Fingerprint
     SSHFP,
+    SVCB,
     //  TA,         // 32768 N/A DNSSEC Trust Authorities
     //  TKEY,       // 249 RFC 2930 Secret key record
     /// RFC 6698 TLSA certificate association
@@ -123,6 +125,12 @@ impl RecordType {
         self == RecordType::CNAME
     }
 
+    /// Returns true if this is an HTTPS
+    #[inline]
+    pub fn is_https(self) -> bool {
+        self == RecordType::HTTPS
+    }
+
     /// Returns true if this is an NS
     #[inline]
     pub fn is_ns(self) -> bool {
@@ -139,6 +147,12 @@ impl RecordType {
     #[inline]
     pub fn is_srv(self) -> bool {
         self == RecordType::SRV
+    }
+
+    /// Returns true if this is an SVCB
+    #[inline]
+    pub fn is_svcb(self) -> bool {
+        self == RecordType::SVCB
     }
 
     /// Returns true if this is an A or an AAAA record
@@ -169,6 +183,7 @@ impl FromStr for RecordType {
             "ANAME" => Ok(RecordType::ANAME),
             "CAA" => Ok(RecordType::CAA),
             "CNAME" => Ok(RecordType::CNAME),
+            "HTTPS" => Ok(RecordType::HTTPS),
             "NULL" => Ok(RecordType::NULL),
             "MX" => Ok(RecordType::MX),
             "NAPTR" => Ok(RecordType::NAPTR),
@@ -178,6 +193,7 @@ impl FromStr for RecordType {
             "SOA" => Ok(RecordType::SOA),
             "SRV" => Ok(RecordType::SRV),
             "SSHFP" => Ok(RecordType::SSHFP),
+            "SVCB" => Ok(RecordType::SVCB),
             "TLSA" => Ok(RecordType::TLSA),
             "TXT" => Ok(RecordType::TXT),
             "ANY" | "*" => Ok(RecordType::ANY),
@@ -210,6 +226,7 @@ impl From<u16> for RecordType {
             252 => RecordType::AXFR,
             257 => RecordType::CAA,
             5 => RecordType::CNAME,
+            65 => RecordType::HTTPS,
             0 => RecordType::ZERO,
             15 => RecordType::MX,
             35 => RecordType::NAPTR,
@@ -221,6 +238,7 @@ impl From<u16> for RecordType {
             6 => RecordType::SOA,
             33 => RecordType::SRV,
             44 => RecordType::SSHFP,
+            64 => RecordType::SVCB,
             52 => RecordType::TLSA,
             16 => RecordType::TXT,
             #[cfg(feature = "dnssec")]
@@ -279,6 +297,7 @@ impl From<RecordType> for &'static str {
             RecordType::AXFR => "AXFR",
             RecordType::CAA => "CAA",
             RecordType::CNAME => "CNAME",
+            RecordType::HTTPS => "HTTPS",
             RecordType::ZERO => "",
             RecordType::IXFR => "IXFR",
             RecordType::MX => "MX",
@@ -291,6 +310,7 @@ impl From<RecordType> for &'static str {
             RecordType::SOA => "SOA",
             RecordType::SRV => "SRV",
             RecordType::SSHFP => "SSHFP",
+            RecordType::SVCB => "SVCB",
             RecordType::TLSA => "TLSA",
             RecordType::TXT => "TXT",
             #[cfg(feature = "dnssec")]
@@ -320,6 +340,7 @@ impl From<RecordType> for u16 {
             RecordType::AXFR => 252,
             RecordType::CAA => 257,
             RecordType::CNAME => 5,
+            RecordType::HTTPS => 65,
             RecordType::ZERO => 0,
             RecordType::IXFR => 251,
             RecordType::MX => 15,
@@ -331,6 +352,7 @@ impl From<RecordType> for u16 {
             RecordType::PTR => 12,
             RecordType::SOA => 6,
             RecordType::SRV => 33,
+            RecordType::SVCB => 64,
             RecordType::SSHFP => 44,
             RecordType::TLSA => 52,
             RecordType::TXT => 16,
@@ -418,6 +440,7 @@ mod tests {
             "ANAME",
             "CAA",
             "CNAME",
+            "HTTPS",
             "NULL",
             "MX",
             "NAPTR",
@@ -426,6 +449,7 @@ mod tests {
             "PTR",
             "SOA",
             "SRV",
+            "SVCB",
             "SSHFP",
             "TLSA",
             "TXT",

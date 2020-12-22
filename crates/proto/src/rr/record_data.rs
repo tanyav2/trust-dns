@@ -27,7 +27,9 @@ use log::{trace, warn};
 
 use super::domain::Name;
 use super::rdata;
-use super::rdata::{CAA, MX, NAPTR, NULL, OPENPGPKEY, OPT, SOA, SRV, SSHFP, TLSA, TXT};
+use super::rdata::{
+    CAA, HTTPS, MX, NAPTR, NULL, OPENPGPKEY, OPT, SOA, SRV, SSHFP, SVCB, TLSA, TXT,
+};
 use super::record_type::RecordType;
 use crate::error::*;
 use crate::serialize::binary::*;
@@ -168,6 +170,8 @@ pub enum RData {
     /// the description of name server logic in [RFC-1034] for details.
     /// ```
     CNAME(Name),
+
+    HTTPS(HTTPS),
 
     /// ```text
     /// 3.3.9. MX RDATA format
@@ -548,6 +552,8 @@ pub enum RData {
     /// [RFC 7479](https://tools.ietf.org/html/rfc7479).
     SSHFP(SSHFP),
 
+    SVCB(SVCB),
+
     /// [RFC 6698, DNS-Based Authentication for TLS](https://tools.ietf.org/html/rfc6698#section-2.1)
     ///
     /// ```text
@@ -642,6 +648,10 @@ impl RData {
                 trace!("reading CNAME");
                 rdata::name::read(decoder).map(RData::CNAME)
             }
+            RecordType::HTTPS => {
+                trace!("reading HTTPS");
+                rdata::svcb::read(decoder).map(RData::HTTPS)
+            }
             RecordType::ZERO => {
                 trace!("reading EMPTY");
                 return Ok(RData::ZERO);
@@ -685,6 +695,10 @@ impl RData {
             RecordType::SSHFP => {
                 trace!("reading SSHFP");
                 rdata::sshfp::read(decoder, rdata_length).map(RData::SSHFP)
+            }
+            RecordType::SVCB => {
+                trace!("reading SVCB");
+                rdata::svcb::read(decoder).map(RData::SVCB)
             }
             RecordType::TLSA => {
                 trace!("reading TLSA");
@@ -800,6 +814,9 @@ impl RData {
             RData::CNAME(ref name) | RData::NS(ref name) | RData::PTR(ref name) => {
                 rdata::name::emit(encoder, name)
             }
+            RData::HTTPS(ref https) => {
+                encoder.with_canonical_names(|encoder| rdata::svcb::emit(encoder, https))
+            }
             RData::ZERO => Ok(()),
             // to_lowercase for rfc4034 and rfc6840
             RData::MX(ref mx) => rdata::mx::emit(encoder, mx),
@@ -820,6 +837,9 @@ impl RData {
             RData::SSHFP(ref sshfp) => {
                 encoder.with_canonical_names(|encoder| rdata::sshfp::emit(encoder, sshfp))
             }
+            RData::SVCB(ref svcb) => {
+                encoder.with_canonical_names(|encoder| rdata::svcb::emit(encoder, svcb))
+            }
             RData::TLSA(ref tlsa) => {
                 encoder.with_canonical_names(|encoder| rdata::tlsa::emit(encoder, tlsa))
             }
@@ -838,6 +858,7 @@ impl RData {
             RData::ANAME(..) => RecordType::ANAME,
             RData::CAA(..) => RecordType::CAA,
             RData::CNAME(..) => RecordType::CNAME,
+            RData::HTTPS(..) => RecordType::HTTPS,
             RData::MX(..) => RecordType::MX,
             RData::NAPTR(..) => RecordType::NAPTR,
             RData::NS(..) => RecordType::NS,
@@ -848,6 +869,7 @@ impl RData {
             RData::SOA(..) => RecordType::SOA,
             RData::SRV(..) => RecordType::SRV,
             RData::SSHFP(..) => RecordType::SSHFP,
+            RData::SVCB(..) => RecordType::SVCB,
             RData::TLSA(..) => RecordType::TLSA,
             RData::TXT(..) => RecordType::TXT,
             #[cfg(feature = "dnssec")]
@@ -880,6 +902,7 @@ impl fmt::Display for RData {
             RData::CAA(ref caa) => w(f, caa),
             // to_lowercase for rfc4034 and rfc6840
             RData::CNAME(ref name) | RData::NS(ref name) | RData::PTR(ref name) => w(f, name),
+            RData::HTTPS(ref https) => w(f, https),
             RData::ZERO => Ok(()),
             // to_lowercase for rfc4034 and rfc6840
             RData::MX(ref mx) => w(f, mx),
@@ -893,6 +916,7 @@ impl fmt::Display for RData {
             // to_lowercase for rfc4034 and rfc6840
             RData::SRV(ref srv) => w(f, srv),
             RData::SSHFP(ref sshfp) => w(f, sshfp),
+            RData::SVCB(ref svcb) => w(f, svcb),
             RData::TLSA(ref tlsa) => w(f, tlsa),
             RData::TXT(ref txt) => w(f, txt),
             #[cfg(feature = "dnssec")]
@@ -1120,6 +1144,7 @@ mod tests {
             RData::ANAME(..) => RecordType::ANAME,
             RData::CAA(..) => RecordType::CAA,
             RData::CNAME(..) => RecordType::CNAME,
+            RData::HTTPS(..) => RecordType::HTTPS,
             RData::MX(..) => RecordType::MX,
             RData::NAPTR(..) => RecordType::NAPTR,
             RData::NS(..) => RecordType::NS,
@@ -1130,6 +1155,7 @@ mod tests {
             RData::SOA(..) => RecordType::SOA,
             RData::SRV(..) => RecordType::SRV,
             RData::SSHFP(..) => RecordType::SSHFP,
+            RData::SVCB(..) => RecordType::SVCB,
             RData::TLSA(..) => RecordType::TLSA,
             RData::TXT(..) => RecordType::TXT,
             #[cfg(feature = "dnssec")]

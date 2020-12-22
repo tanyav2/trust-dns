@@ -45,6 +45,7 @@ impl RDataParser for RData {
             RecordType::AXFR => panic!("parsing AXFR doesn't make sense"), // valid panic, never should happen
             RecordType::CAA => caa::parse(tokens).map(RData::CAA)?,
             RecordType::CNAME => RData::CNAME(name::parse(tokens, origin)?),
+            RecordType::HTTPS => RData::HTTPS(svcb::parse(tokens, origin)?),
             RecordType::IXFR => panic!("parsing IXFR doesn't make sense"), // valid panic, never should happen
             RecordType::MX => RData::MX(mx::parse(tokens, origin)?),
             RecordType::NAPTR => RData::NAPTR(naptr::parse(tokens, origin)?),
@@ -56,6 +57,7 @@ impl RDataParser for RData {
             RecordType::SOA => RData::SOA(soa::parse(tokens, origin)?),
             RecordType::SRV => RData::SRV(srv::parse(tokens, origin)?),
             RecordType::SSHFP => RData::SSHFP(sshfp::parse(tokens)?),
+            RecordType::SVCB => RData::SVCB(svcb::parse(tokens, origin)?),
             RecordType::TLSA => RData::TLSA(tlsa::parse(tokens)?),
             RecordType::TXT => RData::TXT(txt::parse(tokens)?),
             RecordType::DNSSEC(DNSSECRecordType::SIG) => panic!("parsing SIG doesn't make sense"), // valid panic, never should happen

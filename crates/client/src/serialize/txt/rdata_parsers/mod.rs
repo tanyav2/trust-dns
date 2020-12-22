@@ -30,5 +30,6 @@ pub mod openpgpkey;
 pub mod soa;
 pub mod srv;
 pub mod sshfp;
+pub mod svcb;
 pub mod tlsa;
 pub mod txt;
